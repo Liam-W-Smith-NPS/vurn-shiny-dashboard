@@ -1406,6 +1406,34 @@
         "Built": "R 4.5.1; ; 2025-09-28 02:16:38 UTC; windows"
       }
     },
+    "gifski": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "gifski",
+        "Type": "Package",
+        "Title": "Highest Quality GIF Encoder",
+        "Version": "1.32.0-2",
+        "Authors@R": "c(\n    person(\"Jeroen\", \"Ooms\", ,\"jeroenooms@gmail.com\", role = c(\"aut\", \"cre\"),\n      comment = c(ORCID = \"0000-0002-4035-0289\")),\n    person(\"Kornel Lesiński\", role = \"aut\", comment = \"Gifski Rust library\"),\n    person(\"Authors of the dependency Rust crates\", role = \"aut\", \n      comment = \"see AUTHORS file\"))",
+        "Description": "Multi-threaded GIF encoder written in Rust: <https://gif.ski/>. \n    Converts images to GIF animations using pngquant's efficient cross-frame \n    palettes and temporal dithering with thousands of colors per frame.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://r-rust.r-universe.dev/gifski",
+        "BugReports": "https://github.com/r-rust/gifski/issues",
+        "SystemRequirements": "Cargo (Rust's package manager), rustc",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.1.1",
+        "Suggests": "ggplot2, gapminder",
+        "Language": "en-US",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-03-17 21:13:42 UTC; jeroen",
+        "Author": "Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>),\n  Kornel Lesiński [aut] (Gifski Rust library),\n  Authors of the dependency Rust crates [aut] (see AUTHORS file)",
+        "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-03-18 11:10:01 UTC",
+        "Built": "R 4.5.2; x86_64-w64-mingw32; 2025-12-27 01:29:13 UTC; windows",
+        "Archs": "x64"
+      }
+    },
     "glue": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -4532,7 +4560,7 @@
   },
   "files": {
     "app.R": {
-      "checksum": "ee32c8bc0c06e93c8da1854b29865a25"
+      "checksum": "1cbf46aa98e383bf8fb6488dc7a91a33"
     },
     "data/AKR_VUA_Data_2025_name_final8.gdb/a00000001.freelist": {
       "checksum": "c753c3acc994deb6b3e187f022013242"
