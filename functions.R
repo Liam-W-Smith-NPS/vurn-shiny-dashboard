@@ -108,9 +108,9 @@ load_data <- function() {
     left_join(data$daily_visitor_use |>
                 filter(AccountYear < 2025,
                        UserDays != 0) |>
-                group_by(UnitCode, Location, MonthNum) |>
+                group_by(UnitCode, Location, MonthName) |>
                 summarise(UserDays = sum(UserDays), .groups = "drop") |> # sum userdays for each year in each location
-                pivot_wider(names_from = MonthNum, # pivot wider to create a column of userday totals for each year
+                pivot_wider(names_from = MonthName, # pivot wider to create a column of userday totals for each year
                             values_from = UserDays),
               by = join_by(UNITCODE == UnitCode, # redundant but safe
                            Name == Location)) 
@@ -190,7 +190,8 @@ create_static_choropleth_and_bubble <- function(park_vua_activity_data, vua_map_
                 fill.legend = tm_legend("Top Commercial Activity",
                                         bg.color = "black",
                                         text.color = "gray91",
-                                        title.color = "gray91"),
+                                        title.color = "gray91",
+                                        position = tm_pos_out("right", "center")),
                 fill_alpha = 0.7,
                 id = "Name",
                 col = "white",
@@ -205,7 +206,8 @@ create_static_choropleth_and_bubble <- function(park_vua_activity_data, vua_map_
                size.legend = tm_legend("Total Reported User Days",
                                        text.color = "gray91",
                                        title.color = "gray91",
-                                       fill_alpha = 0.8),
+                                       fill_alpha = 0.8,
+                                       position = tm_pos_out("right", "center")),
                fill = "white",
                fill_alpha = 0.5,
                col_alpha = 0.9,
@@ -256,13 +258,21 @@ create_donut_map <- function(visitor_use_export, vua_all_activities, basemap, pa
     tm_shape(vua_all_activities |> # wrangle data for donut charts
                filter(UNITCODE == park) |>
                mutate(Other = `Total Reported User Days` - rowSums(across(all_of(top9_activities)))) |>
-               select(Name, all_of(top9_activities), Other, `Total Reported User Days`) |>
-               mutate(across(all_of(c(top9_activities, "Other")),
+               (\(df){
+                 if (all(df$Other == 0, na.rm = TRUE)) {
+                   other <<- FALSE # create var in global environment to help with selection in tmap's tm_vars() function
+                   select(df, -Other)
+                 } else{
+                   other <<- TRUE # create var in global environment to help with selection in tmap's tm_vars() function
+                   df}
+               })() |>
+               select(Name, any_of(c(top9_activities, "Other")), `Total Reported User Days`) |>
+               mutate(across(any_of(c(top9_activities, "Other")),
                              function(x) { # by trial and error I found the donut charts work if normalized to all sum to 1... maybe summing to 100 or something else would work too
                                if_else(!is.na(x), x/`Total Reported User Days`, x)})),
              name = "Donut Charts"
     ) +
-    tm_donuts(parts = tm_vars(c(top9_activities, "Other"), multivariate = TRUE),
+    tm_donuts(parts = tm_vars(c(top9_activities, if(other) "Other"), multivariate = TRUE),
               fill.scale = tm_scale_categorical(values = "brewer.set3"),
               size = "Total Reported User Days",
               size.scale = tm_scale_continuous_sqrt(values.scale = 2,
@@ -297,7 +307,8 @@ create_animated_choropleth <- function(visitor_use_export, vua_animation_data, p
     tm_shape(vua_animation_data |>
                filter(UNITCODE == park)) +
     tm_polygons(fill = paste0(min_year:max_year), # this is where we set the min and max year to display for each park
-                fill.legend = tm_legend("Total Reported User Days"),
+                fill.legend = tm_legend("Total Reported User Days",
+                                        position = tm_pos_out("right", "center")),
                 fill.scale = tm_scale_continuous(values = "brewer.reds",
                                                  label.na = "No Commercial Use"),
                 fill.free = FALSE,
@@ -398,7 +409,8 @@ create_animated_fire_bubble <- function(visitor_use_export, vua_geom, fire_polyg
                st_point_on_surface()) + 
     tm_bubbles(size = paste0(min_year:max_year),
                size.scale = tm_scale_continuous(values.scale = 3),
-               size.legend = tm_legend("Total Reported User Days"),
+               size.legend = tm_legend("Total Reported User Days",
+                                       position = tm_pos_out("right", "center")),
                fill = "gray91",
                size.free = FALSE,
                fill_alpha = 0.7,
@@ -410,7 +422,8 @@ create_animated_fire_bubble <- function(visitor_use_export, vua_geom, fire_polyg
                   labels = c("Fire Perimeters 1994-2024", "Fire in Displayed Year"),
                   fill = c('orange', 'red'),
                   fill_alpha = 0.5,
-                  col_alpha = 0)+
+                  col_alpha = 0,
+                  position = tm_pos_out("right", "center"))+
     tm_animate(fps = 1) +
     tm_basemap("Esri.WorldTopoMap")
 }
@@ -498,13 +511,11 @@ create_monthly_choropleth_animation <- function(vua_animation_monthly_data, park
     filter(UNITCODE == park) |>
     select(where(not_all_na))
   
-  # # Select only the columns that correspond to year-month combinations and sort them
+  # Select only the columns that correspond to year-month combinations and sort them
   cols <- vua_animation_monthly_data_park |>
     st_drop_geometry() |>
-    select(matches("\\d")) |>
-    colnames() |>
-    as.numeric() |>
-    sort()
+    select(matches(month.name)) |>
+    colnames()
   
   # Create animation
   { if (park == "KLGO") { # kind of ridiculous workaround to correct fig size of KLGO
@@ -512,16 +523,17 @@ create_monthly_choropleth_animation <- function(vua_animation_monthly_data, park
                filter(UNITCODE == park) |>
                st_minimum_bounding_circle()) } } +
     tm_shape(vua_animation_monthly_data_park) +
-      tm_polygons(fill = as.character(cols),
-                  fill.legend = tm_legend("Total Reported User Days"),
-                  fill.scale = tm_scale_continuous(values = "brewer.reds",
-                                                   label.na = "No Commercial Use"),
-                  fill.free = FALSE,
-                  fill_alpha = 0.7,
-                  col_alpha = .5,
-                  lwd = 1,
-                  lwd.legend = tm_legend_hide(),
-                  col = "#CDC9C9") +
+    tm_polygons(fill = cols,
+                fill.legend = tm_legend("Total Reported User Days",
+                                        position = tm_pos_out("right", "center")),
+                fill.scale = tm_scale_continuous(values = "brewer.reds",
+                                                 label.na = "No Commercial Use"),
+                fill.free = FALSE,
+                fill_alpha = 0.7,
+                col_alpha = .5,
+                lwd = 1,
+                lwd.legend = tm_legend_hide(),
+                col = "#CDC9C9") +
     tm_animate(fps = 1) +
     tm_basemap("Esri.WorldTopoMap")
 }

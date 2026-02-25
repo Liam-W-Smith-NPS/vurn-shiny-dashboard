@@ -19,170 +19,196 @@ data <- load_data()
 tmap_mode("view")
 
 # User interface
-ui <- page_sidebar(
-  # CSS to remove horizontal scroll bars from animations
-  tags$style(HTML("
-    .shiny-image-output img {
-    max-width: 100%;
-    height: auto;
-    }")),
+ui <- page_navbar(
   title = "Visitor Use Dashboard",
   # Sidebar with filters that apply to visualizations in all subpages
   sidebar = sidebar(
+    bg = "#F8F8F8",
     selectInput(
       "park",
-      label = "Park",
+      label = tags$b("Park"),
       choices = data$park_codes,
       selected = "KATM"
     ),
     sliderInput(
       "year",
-      "Year Range",
+      label = tags$b("Year Range"),
       min = 2007,
       max = 2024,
       value = c(2007, 2024),
       sep = "" # this removes the comma in the year
     )
   ),
-  page_navbar(
-    # First page with park-level graphs
-    nav_panel(title = "Park Summary",
-              layout_columns(
-                col_widths = breakpoints(
-                  xl = c(6, 6), # larger screens have two columns of graphs
-                  lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
-                ),
-                fill = FALSE,
-                layout_columns(
-                  col_widths = c(12,12),
-                  card(
-                    card_header("Total Visitation over the Years"),
-                    plotlyOutput("park_annual_visitation_graph"),
-                    full_screen = TRUE
-                  ),
-                  card(
-                    card_header("Monthly Visitation over the Years"),
-                    plotlyOutput("park_monthly_visitation_graph"),
-                    full_screen = TRUE
-                  )),
-                layout_columns(
-                  col_widths = c(12,12),
-                  card(
-                    card_header("Daily Visitation Compared Across Years"),
-                    plotlyOutput("park_daily_visitation_graph"),
-                    full_screen = TRUE
-                  ),
-                  card(
-                    card_header("Annual Visitor Use Animation"),
-                    imageOutput("park_annual_visitation_animation"),
-                    full_screen = TRUE
-                  )
-                ))
+  navbar_options = navbar_options(bg = "#F8F8F8"),
+  # First page with park-level graphs
+  nav_panel(title = "Park Summary",
+            layout_columns(
+              col_widths = breakpoints(
+                xl = c(6, 6), # larger screens have two columns of graphs
+                lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
               ),
-    # Second page with VUA-level graphs
-    nav_panel(title = "Inspect by Area",
-                  pickerInput(
-                    "visitor_use_area",
-                    label = "Visitor Use Area",
-                    choices = character(0),
-                    multiple = TRUE,
-                    options = list(`actions-box` = TRUE)
-                  ),
+              fill = FALSE,
               layout_columns(
-                col_widths = breakpoints(
-                  xl = c(6, 6), # larger screens have two columns of graphs
-                  lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
+                col_widths = c(12,12),
+                card(
+                  card_header("Total Visitation over the Years"),
+                  plotlyOutput("park_annual_visitation_graph"),
+                  full_screen = TRUE
                 ),
-                fill = FALSE,
-                layout_columns(
-                  col_widths = c(12, 12),
-                  card(
-                    card_header("Monthly Visitation as a Proportion of All User Days"),
-                    plotlyOutput("vua_monthly_proportion_graph"),
-                    full_screen = TRUE
-                    ),
-                  card(
-                    card_header("First Date of Use Through the Years"),
-                    plotlyOutput("vua_first_use_graph"),
-                    full_screen = TRUE
-                    )),
-                layout_columns(
-                  card(
-                    card_header("Daily Count"),
-                    plotlyOutput("vua_daily_visitation_graph"),
-                    full_screen = TRUE
-                    ))
+                card(
+                  card_header("Monthly Visitation over the Years"),
+                  plotlyOutput("park_monthly_visitation_graph"),
+                  full_screen = TRUE
                 )),
-    # Third page with graphs and a map for selected commercial activities 
-    nav_panel(title = "Inspect by Activity",
+              layout_columns(
+                card(
+                  card_header("Annual Visitor Use Animation"),
+                  imageOutput("park_annual_visitation_animation"),
+                  full_screen = TRUE
+                )
+              ))
+            ),
+  # Second page with VUA-level graphs
+  nav_panel(title = "Inspect by Area",
+            pickerInput(
+              "visitor_use_area",
+              label = tags$b("Visitor Use Area"),
+              choices = character(0),
+              multiple = TRUE,
+              options = list(`actions-box` = TRUE)
+            ),
+            layout_columns(
+              col_widths = breakpoints(
+                xl = c(6, 6), # larger screens have two columns of graphs
+                lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
+              ),
+              fill = FALSE,
+              layout_columns(
+                col_widths = c(12, 12),
+                card(
+                  card_header("Total Visitation by Month"),
+                  plotlyOutput("vua_monthly_visitation_graph"),
+                  full_screen = TRUE
+                  ),
+                card(
+                  card_header("First Date of Use over Time"),
+                  plotlyOutput("vua_first_use_graph"),
+                  full_screen = TRUE
+                  )),
+              layout_columns(
+                col_widths = c(12, 12),
+                card(
+                  card_header("Daily Visitation Summed over All Years"),
+                  plotlyOutput("vua_daily_visitation_graph"),
+                  full_screen = TRUE
+                  ),
+                card(
+                  card_header("Total Visitation over the Years"),
+                  plotlyOutput("vua_annual_visitation_graph"),
+                  full_screen = TRUE
+                ))
+              )),
+  # Third page with graphs and a map for selected commercial activities 
+  nav_panel(title = "Inspect by Activity",
+            pickerInput(
+              "commercial_activity",
+              label = tags$b("Commercial Activity"),
+              choices = character(0),
+              multiple = TRUE,
+              options = list(`actions-box` = TRUE)
+              ),
+            layout_columns(
+              col_widths = breakpoints(
+                xl = c(6, 6), # larger screens have two columns of graphs
+                lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
+              ),
+              fill = FALSE,
+              layout_columns(
+                col_widths = c(12,12),
+                card(
+                  card_header("Daily Visitation Summed over All Years"),
+                  plotlyOutput("activity_daily_visitation_graph"),
+                  full_screen = TRUE
+                ),
+                card(
+                  card_header("Total Visitation over the Years"),
+                  plotlyOutput("activity_annual_visitation_graph"),
+                  full_screen = TRUE
+                )
+              ),
+              layout_columns(
+                card(
+                  card_header("Map of Selected Activities"),
+                  tmapOutput("activity_map"),
+                  full_screen = TRUE
+                ))
+            )),
+  # Fourth page with graphs for selected commercial activities and locations
+  nav_panel(title = "Inspect by Area and Activity",
+            # Include input for both area and activity, not synched with input on other pages
+            fluidRow( # this lets the filters show up side by side instead of stacked
               pickerInput(
-                "commercial_activity",
-                label = "Commercial Activity",
+                "visitor_use_area_2",
+                label = tags$b("Visitor Use Area"),
                 choices = character(0),
                 multiple = TRUE,
                 options = list(`actions-box` = TRUE)
-                ),
-              layout_columns(
-                col_widths = breakpoints(
-                  xl = c(6, 6), # larger screens have two columns of graphs
-                  lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
-                ),
-                fill = FALSE,
-                layout_columns(
-                  col_widths = c(12,12),
-                  card(
-                    card_header("Commercial Activities Daily Count"),
-                    plotlyOutput("activity_daily_visitation_graph"),
-                    full_screen = TRUE
-                  ),
-                  card(
-                    card_header("Commercial Activities Annual Count through the Years"),
-                    plotlyOutput("activity_annual_visitation_graph"),
-                    full_screen = TRUE
-                  )
-                ),
-                layout_columns(
-                  card(
-                    card_header("Map of Selected Activities"),
-                    tmapOutput("activity_map"),
-                    full_screen = TRUE
-                  ))
+              ),
+              pickerInput(
+                "commercial_activity_2",
+                label = tags$b("Commercial Activity"),
+                choices = character(0),
+                multiple = TRUE,
+                options = list(`actions-box` = TRUE)
               )),
-    # Fourth page with top commercial activity map and donut map
-    nav_panel(title = "Commercial Activity Maps",
-              layout_columns(
-                col_widths = breakpoints(
-                  xl = c(6, 6), # larger screens have two columns of graphs
-                  lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
-                ),
-                fill = TRUE,
-                card(
-                  card_header("All Commercial Activities in Each Visitor Use Area"),
-                  tmapOutput("map_donut"),
-                  full_screen = TRUE),
-                card(
-                  card_header("Top Commercial Activity in Each Visitor Use Area"),
-                  tmapOutput("map_top_activity"),
-                  full_screen = TRUE
-              ))),
-    # Fifth page with animations
-    nav_panel(title = "Animations",
-              layout_columns(
-                col_widths = breakpoints(
-                  xl = c(6, 6), # larger screens have two columns of graphs
-                  lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
-                ),
-                fill = TRUE,
-                card(
-                  card_header("Monthly Visitor Use Animation"),
-                  imageOutput("animation_by_month"),
-                  full_screen = TRUE),
-                card(
-                  card_header("Annual Visitor Use Animation & Burned Areas"),
-                  imageOutput("animation_fire"),
-                  full_screen = TRUE)
-                ))
-  ))
+            layout_columns(
+              col_widths =  c(12, 12),
+              fill = FALSE,
+              card(
+                card_header("Total Visitation over the Years"),
+                plotlyOutput("vua_activity_annual_visitation_graph"),
+                full_screen = TRUE),
+              card(
+                card_header("Daily Visitation Summed over All Years"),
+                plotlyOutput("vua_activity_daily_visitation_graph"),
+                full_screen = TRUE)
+            )
+  ),
+  # Fifth page with top commercial activity map and donut map
+  nav_panel(title = "Commercial Activity Maps",
+            layout_columns(
+              col_widths = breakpoints(
+                xl = c(6, 6), # larger screens have two columns of graphs
+                lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
+              ),
+              fill = TRUE,
+              card(
+                card_header("All Commercial Activities in Each Visitor Use Area"),
+                tmapOutput("map_donut"),
+                full_screen = TRUE),
+              card(
+                card_header("Top Commercial Activity in Each Visitor Use Area"),
+                tmapOutput("map_top_activity"),
+                full_screen = TRUE
+            ))),
+  # Sixth page with animations
+  nav_panel(title = "Animations",
+            layout_columns(
+              col_widths = breakpoints(
+                xl = c(6, 6), # larger screens have two columns of graphs
+                lg = c(12, 12) # on smaller screens each graph takes up the whole page width and you have to scroll
+              ),
+              fill = TRUE,
+              card(
+                card_header("Monthly Visitor Use Animation"),
+                imageOutput("animation_by_month"),
+                full_screen = TRUE),
+              card(
+                card_header("Annual Visitor Use Animation & Burned Areas"),
+                imageOutput("animation_fire"),
+                full_screen = TRUE)
+              ))
+  )
 
 # Server logic
 server <- function(input, output, session) {
@@ -200,12 +226,13 @@ server <- function(input, output, session) {
       pull(AccountYear) |>
       max()}) 
 
-  observeEvent(input$park, {
-    updateSliderInput(session = session,
-                      inputId = "year",
-                      min = min_year(),
-                      max = max_year(),
-                      value = c(min_year(), max_year()))
+  observe(input$park) |> 
+    bindEvent({
+      updateSliderInput(session = session,
+                        inputId = "year",
+                        min = min_year(),
+                        max = max_year(),
+                        value = c(min_year(), max_year()))
   })
   # ----------------------------------------------------
   # Park Summary page
@@ -231,38 +258,6 @@ server <- function(input, output, session) {
                xlab("Year") +
                ylab("Reported User Days")
     ) |>
-      highlight(on = "plotly_click",
-                off = "plotly_relayout")
-  })
-  
-  # Daily visitation compared across years: data
-  # Runs once
-  park_daily_visitation_data <- data$daily_visitor_use |>
-    group_by(UnitCode, AccountYear, Date) |> 
-    summarise(UserDays = sum(UserDays), .groups = "drop") |>
-    filter(UserDays != 0) |>
-    mutate(DisplayDate = Date,
-           Date =  update(Date, year = 3000))
-
-  # Daily visitation compared across years: graph
-  # Runs when filters modified
-  output$park_daily_visitation_graph <- renderPlotly({
-    ggplotly(p = park_daily_visitation_data |>
-               filter(UnitCode == input$park,
-                      AccountYear <= input$year[2] & AccountYear >= input$year[1]) |>
-               mutate(AccountYear = as.factor(AccountYear)) |>
-               highlight_key(~AccountYear) |>
-               ggplot(aes(x = Date,
-                          y = UserDays,
-                          color = AccountYear,
-                          label = DisplayDate)) +
-               geom_point() +
-               theme_classic() +
-               xlab("Date") +
-               ylab("Reported User Days") +
-               labs(color = "Year"),
-             tooltip = c("DisplayDate", "UserDays")
-             ) |>
       highlight(on = "plotly_click",
                 off = "plotly_relayout")
   })
@@ -337,65 +332,67 @@ server <- function(input, output, session) {
       pull(Location) |>
       sort()}) 
   
-  observeEvent(input$park, {
-    updatePickerInput(session = session,
-                      inputId = "visitor_use_area",
-                      choices = vua(),
-                      selected = character(0)) # by default nothing selected
+  observe(input$park) |>
+    bindEvent({
+      updatePickerInput(session = session,
+                        inputId = "visitor_use_area",
+                        choices = vua(),
+                        selected = character(0)) # by default nothing selected
   })
   
-  # Monthly visitation as a proportion of all user days: data
+  # Total Visitation by Month: data
   # Runs when filters modified -- needed because aggregating multiple years (which the user can filter) into monthly summary
-  vua_monthly_proportion_data <- reactive({
+  vua_monthly_visitation_data <- reactive({
     data$daily_visitor_use |>
       filter(UnitCode == input$park,
              Location %in% input$visitor_use_area,
              AccountYear <= input$year[2] & AccountYear >= input$year[1]) |>
-      group_by(UnitCode, Location, MonthNum) |>
-      summarise(UserDays = sum(UserDays), .groups = "drop_last") |>
+      group_by(UnitCode, Location, MonthName) |>
+      summarise(UserDays = sum(UserDays), .groups = "drop") |>
       filter(UserDays != 0) |>
-      mutate(Total = sum(UserDays)) |>
-      ungroup() |>
-      mutate(Percent = UserDays/Total * 100)
+      mutate(MonthName = factor(MonthName, 
+                                levels = c("January", "February", "March", "April", 
+                                           "May", "June", "July", "August", "September", 
+                                           "October", "November", "December")))
     })
   
-  # Monthly visitation as a proportion of all user days: graph
+  # Total Visitation by Month: graph
   # Runs when filters modified
-  output$vua_monthly_proportion_graph <- renderPlotly({
+  output$vua_monthly_visitation_graph <- renderPlotly({
     # Display helpful validation message rather than scary red error
     validate(
       need(!is.na(input$visitor_use_area), "Please select visitor use area(s)")
     )
     # Create graph
     withProgress(message = "Generating figure...", {
-      ggplotly(p = vua_monthly_proportion_data() |>
-                 highlight_key(~Location) |>
-                 ggplot(aes(x = MonthNum,
-                            y = Percent,
-                            color = Location)) +
-                 geom_line() +
-                 geom_point() +
+      ggplotly(p = vua_monthly_visitation_data() |>
+                 highlight_key(~MonthName) |>
+                 ggplot(aes(x = UserDays,
+                            y = Location,
+                            fill = MonthName)) +
+                 geom_col(position = position_stack(reverse = TRUE))+
                  theme_classic() +
-                 xlab("Month") +
-                 ylab("Percent of Total User Days")) |>
+                 xlab("Total Reported User Days") +
+                 ylab("") +
+                 labs(fill = "Month")) |>
         highlight(on = "plotly_click",
                   off = "plotly_relayout")
     })
   })
   
-  # Daily count: data
+  # Daily Visitation Summed over All Years: data
   # Runs when filters modified -- needed because aggregating multiple years (which the user can filter) into daily summary
   vua_daily_visitation_data <- reactive({data$daily_visitor_use |>
     filter(AccountYear <= input$year[2] & AccountYear >= input$year[1],
            UnitCode == input$park,
            Location %in% input$visitor_use_area) |>
-    mutate(Date =  update(Date, year = 3000)) |>
+    mutate(Date =  update(Date, year = 3000)) |> # setting all dates to arbitrary year so we can aggregate dates together across years
     group_by(UnitCode, Location, Date) |>
     summarise(UserDays = sum(UserDays), .groups = "drop") |>
     filter(UserDays != 0) |>
     mutate(`Month-Date` = str_extract(Date, "(?<=-).*"))})
   
-  # Daily count: graph
+  # Daily Visitation Summed over All Years: graph
   # Runs when filters modified
   output$vua_daily_visitation_graph <- renderPlotly({
     # Display helpful validation message rather than scary red error
@@ -411,7 +408,6 @@ server <- function(input, output, session) {
                             color = Location,
                             label = `Month-Date`)) +
                  geom_line() +
-                 geom_point() +
                  theme_classic() +
                  xlab("Date") +
                  ylab("Reported User Days"),
@@ -422,15 +418,15 @@ server <- function(input, output, session) {
     })
   })
   
-  # First day of use through the years: data
+  # First Date of Use over Time: data
   # Runs once
   vua_first_use_data <- data$daily_visitor_use |>
     group_by(UnitCode, Location, AccountYear) |>
     summarise(first_reported_use = min(Date), .groups = 'drop') |>
-    mutate(first_reported_use = update(first_reported_use, year = 3000),
+    mutate(first_reported_use = update(first_reported_use, year = 3000), # setting all dates to arbitrary year so we can find earliest date amongst all years
            `Month-Date` = str_extract(first_reported_use, "(?<=-).*"))
   
-  # First day of use through the years: graph
+  # First Date of Use over Time: graph
   # Runs when filters modified
   output$vua_first_use_graph <- renderPlotly({
     # Display helpful validation message rather than scary red error
@@ -466,6 +462,38 @@ server <- function(input, output, session) {
     })
   })
   
+  # Total Visitation over the Years: data
+  # Runs once
+  vua_annual_visitation_data <- data$visitor_use_export|>
+    group_by(UnitCode, Location, AccountYear) |>
+    summarize(UserDays = sum(UserDays), .groups = "drop")
+  
+  # Total Visitation over the Years: graph
+  # Runs when filters modified
+  output$vua_annual_visitation_graph <- renderPlotly({
+    # Display helpful validation message rather than scary red error
+    validate(
+      need(!is.na(input$visitor_use_area), "Please select commercial activity(s)")
+    )
+    # Create graph
+    ggplotly(p = vua_annual_visitation_data |>
+               filter(UnitCode == input$park,
+                      AccountYear <= input$year[2] & AccountYear >= input$year[1],
+                      Location %in% input$visitor_use_area) |>
+               highlight_key(~Location) |>
+               ggplot(aes(x = AccountYear,
+                          y = UserDays,
+                          color = Location)) +
+               geom_line() +
+               geom_point() +
+               theme_classic() +
+               xlab("Year") +
+               ylab("Reported User Days")
+    ) |>
+      highlight(on = "plotly_click",
+                off = "plotly_relayout")
+  })
+  
   # ----------------------------------------------------
   # Inspect by Activity page
   # ----------------------------------------------------
@@ -476,11 +504,12 @@ server <- function(input, output, session) {
       pull(CommercialActivity) |>
       sort()}) 
   
-  observeEvent(input$park, {
-    updatePickerInput(session = session,
-                      inputId = "commercial_activity",
-                      choices = activity(),
-                      selected = character(0)) # by default nothing selected
+  observe(input$park) |>
+    bindEvent({
+      updatePickerInput(session = session,
+                        inputId = "commercial_activity",
+                        choices = activity(),
+                        selected = character(0)) # by default nothing selected
   })
   
   # Map of selected activities: data and map
@@ -498,19 +527,19 @@ server <- function(input, output, session) {
                                   park = input$park)
   })
   
-  # Commercial activities daily count: data
+  # Daily Visitation Summed over All Years: data
   # Runs when filters modified -- needed because aggregating multiple years (which the user can filter) into daily summary
   activity_daily_visitation_data <- reactive({data$daily_visitor_use |>
       filter(AccountYear <= input$year[2] & AccountYear >= input$year[1],
              UnitCode == input$park,
              CommercialActivity %in% input$commercial_activity) |>
-      mutate(Date =  update(Date, year = 3000)) |>
+      mutate(Date =  update(Date, year = 3000)) |> # setting all dates to arbitrary year so we can aggregate dates together across years
       group_by(UnitCode, CommercialActivity, Date) |>
       summarise(UserDays = sum(UserDays), .groups = "drop") |>
       filter(UserDays != 0) |>
       mutate(`Month-Date` = str_extract(Date, "(?<=-).*"))})
   
-  # Commercial activities daily count: graph
+  # Daily Visitation Summed over All Years: graph
   # Runs when filters modified
   output$activity_daily_visitation_graph <- renderPlotly({
     # Display helpful validation message rather than scary red error
@@ -525,7 +554,6 @@ server <- function(input, output, session) {
                           color = CommercialActivity,
                           label = `Month-Date`)) +
                geom_line() +
-               geom_point() +
                theme_classic() +
                xlab("Date") +
                ylab("Reported User Days") +
@@ -536,7 +564,7 @@ server <- function(input, output, session) {
                 off = "plotly_relayout")
   })
   
-  # Commercial activities annual count through the years: data
+  # Total Visitation over the Years: data
   # Runs once
   activity_annual_visitation_data <- data$visitor_use_export |>
     group_by(UnitCode,
@@ -544,7 +572,7 @@ server <- function(input, output, session) {
              AccountYear) |>
     summarise(UserDays = sum(UserDays), .groups = "drop")
   
-  # Commercial activities annual count through the years: graph
+  # Total Visitation over the Years: graph
   # Runs when filters modified
   output$activity_annual_visitation_graph <- renderPlotly({
     # Display helpful validation message rather than scary red error
@@ -569,6 +597,148 @@ server <- function(input, output, session) {
     ) |>
       highlight(on = "plotly_click",
                 off = "plotly_relayout")
+  })
+  
+  # ----------------------------------------------------
+  # Inspect by Area and Activity page
+  # ----------------------------------------------------
+  # Making visitor use area and commercial activity options change depending on the selected park
+  observe(input$park) |>
+    bindEvent({
+      updatePickerInput(session = session,
+                        inputId = "visitor_use_area_2",
+                        choices = vua(),
+                        selected = character(0)) # by default nothing selected
+  })
+  
+  observe(input$park) |>
+    bindEvent({
+      updatePickerInput(session = session,
+                        inputId = "commercial_activity_2",
+                        choices = activity(),
+                        selected = character(0)) # by default nothing selected
+  })
+  
+  # Annual count through the years: data
+  # Runs once
+  vua_activity_annual_visitation_data <- data$visitor_use_export|>
+    group_by(UnitCode, Location, CommercialActivity, AccountYear) |>
+    summarize(UserDays = sum(UserDays), .groups = "drop")
+  
+  # Annual count through the years: graph
+  # Runs when filters modified
+  output$vua_activity_annual_visitation_graph <- renderPlotly({
+    # Display helpful validation message rather than scary red error when nothing selected
+    validate(
+      need(length(input$commercial_activity_2) > 0 & length(input$visitor_use_area_2) > 0, 
+           "Please select commercial activity(s) and visitor use area(s)")
+    )
+    
+    # Display validation message when commercial activity not present in VUA
+    validate(
+      need(vua_activity_annual_visitation_data |>
+             filter(UnitCode == input$park,
+                    AccountYear <= input$year[2] & AccountYear >= input$year[1],
+                    CommercialActivity %in% input$commercial_activity_2,
+                    Location %in% input$visitor_use_area_2) |>
+        nrow() > 0, "Selected commercial activity(s) not found in selected visitor use area(s)")
+    )
+    
+    # Create graph
+    plt <- ggplotly(p = vua_activity_annual_visitation_data |>
+                      filter(UnitCode == input$park,
+                             AccountYear <= input$year[2] & AccountYear >= input$year[1],
+                             CommercialActivity %in% input$commercial_activity_2,
+                             Location %in% input$visitor_use_area_2) |>
+                      mutate(Location_Activity = paste(Location, CommercialActivity, sep = ", ")) |>
+                      highlight_key(~Location_Activity) |>
+                      ggplot(aes(x = AccountYear,
+                                 y = UserDays,
+                                 color = Location,
+                                 linetype = CommercialActivity)) + 
+                      geom_line() +
+                      geom_point(aes(size = UnitCode)) + # same for all since data was filtered -- included aes() to separate point from line in legend
+                      scale_size_manual(values = c(1.5)) +
+                      theme_classic() +
+                      xlab("Year") +
+                      ylab("Reported User Days"),
+                    tooltip = c("CommercialActivity", "AccountYear", "UserDays", "Location")) |>
+      highlight(on = "plotly_click",
+                off = "plotly_relayout") |>
+      layout(legend = list(title = list(text = "Location and Commercial Activity")))
+    
+    
+    # Edit plotly legend
+    for(i in 1:length((plt$x$data))) {
+      # Remove () and add space after comma in lines legend
+      if (plt$x$data[[i]]$mode == "lines") {
+        plt$x$data[[i]]$name <- substr(plt$x$data[[i]]$name, 2, nchar(plt$x$data[[i]]$name)-3) |>
+          str_replace_all(",(\\S)", ", \\1")
+      } # Remove point legend altogether
+      else if (plt$x$data[[i]]$mode == "markers") {
+        plt$x$data[[i]]$showlegend <- FALSE
+      }
+    }
+    plt
+  })
+  
+  # Daily count: data
+  # Runs when filters modified -- needed because aggregating multiple years (which the user can filter) into daily summary
+  vua_activity_daily_visitation_data <- reactive({data$daily_visitor_use |>
+      filter(AccountYear <= input$year[2] & AccountYear >= input$year[1],
+             UnitCode == input$park,
+             Location %in% input$visitor_use_area_2,
+             CommercialActivity %in% input$commercial_activity_2) |>
+      mutate(Date =  update(Date, year = 3000)) |> # setting all dates to arbitrary year so we can aggregate dates together across years
+      group_by(UnitCode, Location, CommercialActivity, Date) |>
+      summarise(UserDays = sum(UserDays), .groups = "drop") |>
+      filter(UserDays != 0) |>
+      mutate(`Month-Date` = str_extract(Date, "(?<=-).*"))})
+  
+  # Daily count: graph
+  # Runs when filters modified
+  output$vua_activity_daily_visitation_graph <- renderPlotly({
+    # Display helpful validation message rather than scary red error when nothing selected
+    validate(
+      need(length(input$commercial_activity_2) > 0 & length(input$visitor_use_area_2) > 0, 
+           "Please select commercial activity(s) and visitor use area(s)")
+    )
+    
+    # Display validation message when commercial activity not present in VUA
+    validate(
+      need(vua_activity_annual_visitation_data |>
+             filter(UnitCode == input$park,
+                    AccountYear <= input$year[2] & AccountYear >= input$year[1],
+                    CommercialActivity %in% input$commercial_activity_2,
+                    Location %in% input$visitor_use_area_2) |>
+             nrow() > 0, "Selected commercial activity(s) not found in selected visitor use area(s)")
+    )
+    
+    # Create graph
+    plt <- ggplotly(p = vua_activity_daily_visitation_data() |>
+                      mutate(Location_Activity = paste(Location, CommercialActivity, sep = ", ")) |>
+                      highlight_key(~Location_Activity) |>
+                      ggplot(aes(x = Date,
+                                 y = UserDays,
+                                 color = Location,
+                                 linetype = CommercialActivity,
+                                 label = `Month-Date`)) + 
+                      geom_line() +
+                      theme_classic() +
+                      xlab("Date") +
+                      ylab("Reported User Days"),
+                    tooltip = c("Month-Date", "UserDays", "Location", "CommercialActivity")) |>
+      highlight(on = "plotly_click",
+                off = "plotly_relayout") |>
+      layout(legend = list(title = list(text = "Location and Commercial Activity")))
+    
+    
+    # Remove () and add space after comma in legend
+    for(i in 1:length((plt$x$data))) {
+      plt$x$data[[i]]$name <- substr(plt$x$data[[i]]$name, 2, nchar(plt$x$data[[i]]$name)-1) |>
+        str_replace_all(",(\\S)", ", \\1")
+    }
+    plt
   })
   
   # ----------------------------------------------------
@@ -619,7 +789,7 @@ server <- function(input, output, session) {
                rename(ActivityUserDays = UserDays),
              name = "Top Commercial Activities") +
       tm_polygons(fill = "CommercialActivity",
-                  fill.scale = tm_scale_categorical(values = "Set3",
+                  fill.scale = tm_scale_categorical(values = "brewer.set3",
                                                     label.na = "No Commercial Use"),
                   fill.legend = tm_legend("Top Commercial Activity",
                                           bg.alpha = 0.9,
@@ -677,9 +847,9 @@ server <- function(input, output, session) {
                                                                      filter(AccountYear <= input$year[2] & AccountYear >= input$year[1],
                                                                             UnitCode == input$park,
                                                                             UserDays != 0) |>
-                                                                     group_by(UnitCode, Location, MonthNum) |>
+                                                                     group_by(UnitCode, Location, MonthName) |>
                                                                      summarise(UserDays = sum(UserDays), .groups = "drop") |> # sum userdays for each year in each location
-                                                                     pivot_wider(names_from = MonthNum, # pivot wider to create a column of userday totals for each year
+                                                                     pivot_wider(names_from = MonthName, # pivot wider to create a column of userday totals for each year
                                                                                  values_from = UserDays),
                                                                    by = join_by(UNITCODE == UnitCode, # redundant but safe
                                                                                 Name == Location)),
