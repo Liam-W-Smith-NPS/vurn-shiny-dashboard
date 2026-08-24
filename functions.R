@@ -17,7 +17,7 @@ load_data <- function() {
   # Wrangle tabular data to match export from IRMA website 
   # (adjusted so trips splitting multiple months fall into each month proportinoally)
   data$visitor_use_export <- data$daily_visitor_use |>
-    filter(AccountYear < 2025) |>
+    filter(AccountYear < 2026) |>
     group_by(UnitCode, AccountYear, Location, Park, Preserve, BC, FC, Wilderness, 
              Coast, CommercialActivity, MonthName, MonthNum) |>
     summarise(UserDays = sum(UserDays),
@@ -28,7 +28,7 @@ load_data <- function() {
   data$fire_polygons <- st_read(dsn = here("data/AlaskaFireHistory_Polygons.gdb"),
                                 layer = "AK_fire_location_polygons_AKAlbersNAD83",
                                 quiet = TRUE) |>
-    filter(FIREYEAR %in% 1994:2024) |> # filter for polygons from last 30 years
+    filter(FIREYEAR %in% 1994:2025) |> # filter for polygons from last 30 years
     st_cast("MULTIPOLYGON") |> # convert curved geometries to multipolygon to prevent issues with sf and tmap
     st_transform(6393) # convert to match CRS for VUA
   
@@ -106,7 +106,7 @@ load_data <- function() {
   # To the geometries, joins visitor use export summarized for each month of each year
   data$vua_animation_monthly_data <- data$vua_geom |>
     left_join(data$daily_visitor_use |>
-                filter(AccountYear < 2025,
+                filter(AccountYear < 2026,
                        UserDays != 0) |>
                 group_by(UnitCode, Location, MonthName) |>
                 summarise(UserDays = sum(UserDays), .groups = "drop") |> # sum userdays for each year in each location
@@ -419,7 +419,7 @@ create_animated_fire_bubble <- function(visitor_use_export, vua_geom, fire_polyg
                col = "white") +
     tm_add_legend(title = "Burned Areas",
                   type = "polygons",
-                  labels = c("Fire Perimeters 1994-2024", "Fire in Displayed Year"),
+                  labels = c("Fire Perimeters 1994-2025", "Fire in Displayed Year"),
                   fill = c('orange', 'red'),
                   fill_alpha = 0.5,
                   col_alpha = 0,

@@ -34,8 +34,8 @@ ui <- page_navbar(
       "year",
       label = tags$b("Year Range"),
       min = 2007,
-      max = 2024,
-      value = c(2007, 2024),
+      max = 2025,
+      value = c(2007, 2025),
       sep = "" # this removes the comma in the year
     )
   ),
