@@ -4,12 +4,11 @@ load_data <- function() {
   data <- list()
   
   # Load geometry data
-  data$vua_geom <- st_read(dsn = here("data/AKR_VUA_Data_2025_name_final8.gdb"), # load data
-                           layer = "ALL_VUA_2026_PY_20260112",
+  data$vua_geom <- st_read(dsn = here("data/AKR_CUA_Location_Polygons_20260414.gdb"), # load data
                            quiet = TRUE) |>
     st_cast("MULTIPOLYGON") |> # convert curved geometries to multipolygon to prevent issues with sf and tmap
     st_transform(6393) |> # convert to Alaska specific CRS
-    select(UNITCODE, UNITNAME, Name, MAPLABEL, GROUPCODE, GROUPNAME) # select just the columns we need
+    select(UNITCODE, UNITNAME, Name, GROUPCODE, GROUPNAME) # select just the columns we need
   
   # Read in tabular data
   data$daily_visitor_use <- read_csv(here("data/daily_visitor_use.csv"))
