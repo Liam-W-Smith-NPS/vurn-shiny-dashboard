@@ -283,6 +283,37 @@
         "Archs": "x64"
       }
     },
+    "av": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "av",
+        "Type": "Package",
+        "Title": "Working with Audio and Video in R",
+        "Version": "0.9.6",
+        "Authors@R": "\n    person(\"Jeroen\", \"Ooms\", , \"jeroenooms@gmail.com\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0002-4035-0289\"))",
+        "Description": "Bindings to 'FFmpeg' <http://www.ffmpeg.org/> AV library for working with \n    audio and video in R. Generates high quality video from images or R graphics with \n    custom audio. Also offers high performance tools for reading raw audio, creating\n    'spectrograms', and converting between countless audio / video formats. This package \n    interfaces directly to the C API and does not require any command line utilities.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://ropensci.r-universe.dev/av, https://docs.ropensci.org/av/",
+        "BugReports": "https://github.com/ropensci/av/issues",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.2",
+        "SystemRequirements": "FFmpeg (>= 3.2); with at least libx264 and lame\n(mp3) drivers. MacOS Homebrew: ffmpeg. Debian/Ubuntu:\nlibavfilter-dev. Fedora/RHEL: either ffmpeg-devel from\nhttps://rpmfusion.org (preferred), or libavfilter-free-devel\nwhich is a more limited version available on Fedora/EPEL9.",
+        "Depends": "R (>= 3.5)",
+        "Imports": "graphics",
+        "Config/Needs/website": "seewave, ggplot2, phonTools, signal, tuneR",
+        "Suggests": "curl, testthat, ps, ggplot2, gapminder",
+        "Language": "en-US",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-10-19 16:45:30 UTC; jeroen",
+        "Author": "Jeroen Ooms [aut, cre] (ORCID: <https://orcid.org/0000-0002-4035-0289>)",
+        "Maintainer": "Jeroen Ooms <jeroenooms@gmail.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-10-20 05:10:40 UTC",
+        "Built": "R 4.5.3; x86_64-w64-mingw32; 2026-08-24 01:27:06 UTC; windows",
+        "Archs": "x64"
+      }
+    },
     "backports": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -4551,7 +4582,7 @@
   },
   "files": {
     "app.R": {
-      "checksum": "d80b1c4cdc0fee84f15704a04aba88d7"
+      "checksum": "7c707543a18b522e6808102df6e87817"
     },
     "data/AKR_CUA_Location_Polygons_20260414.gdb/a00000001.freelist": {
       "checksum": "0adb4d1924a03762ebf6bc944686f7e8"
