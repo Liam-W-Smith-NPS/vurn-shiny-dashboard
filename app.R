@@ -9,10 +9,13 @@ library(bslib)
 library(plotly)
 library(shinyWidgets)
 library(classInt)
-library(gifski)
 source("functions.R")
 data <- load_data()
 tmap_mode("view")
+
+video_dir <- tempfile("videos")
+dir.create(video_dir)
+addResourcePath("videos", video_dir)
 
 # User interface
 ui <- page_navbar(
@@ -59,8 +62,8 @@ ui <- page_navbar(
               layout_columns(
                 card(
                   card_header("Annual Visitor Use Animation"),
-                  imageOutput("park_annual_visitation_animation"),
-                  full_screen = TRUE
+                  uiOutput("park_annual_visitation_animation"),
+                  full_screen = FALSE
                 )
               ))
             ),
@@ -197,17 +200,29 @@ ui <- page_navbar(
               fill = TRUE,
               card(
                 card_header("Monthly Visitor Use Animation"),
-                imageOutput("animation_by_month"),
-                full_screen = TRUE),
+                uiOutput("animation_by_month"),
+                full_screen = FALSE),
               card(
                 card_header("Annual Visitor Use Animation & Burned Areas"),
-                imageOutput("animation_fire"),
-                full_screen = TRUE)
+                uiOutput("animation_fire"),
+                full_screen = FALSE)
               ))
   )
 
 # Server logic
 server <- function(input, output, session) {
+  # ----------------------------------------------------
+  # Handle temporary file directories
+  # ----------------------------------------------------
+  # Per-session subdirectory under the shared video_dir
+  session_video_dir <- file.path(video_dir, session$token)
+  dir.create(session_video_dir)
+  
+  # Delete temp directory after user disconnects
+  onSessionEnded(function() {
+    unlink(session_video_dir, recursive = TRUE)
+  })
+  
   # ----------------------------------------------------
   # Park and Year Sidebar
   # ----------------------------------------------------
@@ -291,14 +306,15 @@ server <- function(input, output, session) {
   
   # Annual Visitor Use Animation: data & animation
   # Runs when filters modified
-  output$park_annual_visitation_animation <- renderImage({
+  annual_viz_video_filename <- reactive({
+    
     # Include progress bar
     withProgress(message = "Generating animation...", {
+      # Create tempfile path to store mp4
+      file_path <- tempfile(tmpdir = session_video_dir, fileext = ".mp4")
+      
       # Switch to plot mode for the creation of the animation
       tmap_mode("plot")
-      
-      # Set the file path for the animation
-      out <- tempfile(fileext = ".gif")
       
       # Create animation using function in functions.R
       animation <- create_animated_choropleth(data$visitor_use_export |>
@@ -309,14 +325,24 @@ server <- function(input, output, session) {
                                               input$park)
       # Write animation to file
       tmap_animation(animation,
-                     filename = out)
-      
+                     filename = file_path)
+  
       # Switch back to view mode
       tmap_mode("view")
+      
+      # Return basename of file path
+      basename(file_path)
     })
-    expr = list(src = out)}, # file path to animation
-    deleteFile = TRUE
-  )
+  })
+  
+  output$park_annual_visitation_animation <- renderUI({
+    req(annual_viz_video_filename())
+    tags$video(
+      src = file.path("videos", session$token, annual_viz_video_filename()),
+      type = "video/mp4",
+      controls = NA, # valueless but must be included for controls to display
+    )
+  })
   
   # ----------------------------------------------------
   # Inspect by Area page
@@ -828,15 +854,16 @@ server <- function(input, output, session) {
   # ----------------------------------------------------
   # Monthly Visitor Use Animation: data and animation
   # Runs when filters modified
-  output$animation_by_month <- renderImage({
+  monthly_viz_video_filename <- reactive({
+    
     # Include progress bar
     withProgress(message = "Generating animation...", {
+      # Create tempfile path to store mp4
+      file_path <- tempfile(tmpdir = session_video_dir, fileext = ".mp4")
+      
       # Switch to plot mode for the creation of the animation
       tmap_mode("plot")
-
-      # Set the file path for the animation
-      out <- tempfile(fileext = ".gif")
-
+      
       # Create animation using function in functions.R
       animation <- create_monthly_choropleth_animation(data$vua_geom |>
                                                          left_join(data$daily_visitor_use |>
@@ -850,28 +877,38 @@ server <- function(input, output, session) {
                                                                    by = join_by(UNITCODE == UnitCode, # redundant but safe
                                                                                 Name == Location)),
                                                        input$park)
-
       # Write animation to file
       tmap_animation(animation,
-                     filename = out)
-
+                     filename = file_path)
+      
       # Switch back to view mode
       tmap_mode("view")
+      
+      # Return basename of file path
+      basename(file_path)
     })
-    expr = list(src = out)}, # file path to animation
-    deleteFile = TRUE 
-  )
+  })
+  
+  output$animation_by_month <- renderUI({
+    req(monthly_viz_video_filename())
+    tags$video(
+      src = file.path("videos", session$token, monthly_viz_video_filename()),
+      type = "video/mp4",
+      controls = NA, # valueless but must be included for controls to display
+    )
+  })
   
   # Annual Visitor Use Animation & Burned Areas: data and animation
   # Runs when filters modified
-  output$animation_fire <- renderImage({
+  annual_fire_video_filename <- reactive({
+    
     # Include progress bar
     withProgress(message = "Generating animation...", {
+      # Create tempfile path to store mp4
+      file_path <- tempfile(tmpdir = session_video_dir, fileext = ".mp4")
+      
       # Switch to plot mode for the creation of the animation
       tmap_mode("plot")
-      
-      # Set the file path for the animation
-      out <- tempfile(fileext = ".gif")
       
       # Create animation using function in functions.R
       animation <- create_animated_fire_bubble(data$visitor_use_export |>
@@ -886,14 +923,24 @@ server <- function(input, output, session) {
       
       # Write animation to file
       tmap_animation(animation,
-                     filename = out)
+                     filename = file_path)
       
       # Switch back to view mode
       tmap_mode("view")
+      
+      # Return basename of file path
+      basename(file_path)
     })
-    expr = list(src = out)}, # file path to animation
-    deleteFile = TRUE 
-  )
+  })
+  
+  output$animation_fire <- renderUI({
+    req(annual_fire_video_filename())
+    tags$video(
+      src = file.path("videos", session$token, annual_fire_video_filename()),
+      type = "video/mp4",
+      controls = NA, # valueless but must be included for controls to display
+    )
+  })
 }
 
 # Run the app
