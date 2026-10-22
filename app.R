@@ -37,6 +37,14 @@ ui <- page_navbar(
       max = 2025,
       value = c(2007, 2025),
       sep = "" # this removes the comma in the year
+    ),
+    tags$div(
+      tags$p("Data Sources", style = "margin: 0; font-weight: bold;"),
+      tags$ul(
+        tags$li(tags$a("Visitor use areas", href = "https://irma.nps.gov/DataStore/Reference/Profile/2303057", target = "_blank")),
+        tags$li(tags$a("Visitor use data", href = "https://github.com/Liam-W-Smith-NPS/vurn-shiny-dashboard-dev/blob/main/data/daily_visitor_use.csv", target = "_blank")),
+        tags$li(tags$a("Fire history data", href = "https://fire.ak.blm.gov/predsvcs/maps.php", target = "_blank"))
+      )
     )
   ),
   navbar_options = navbar_options(bg = "#F8F8F8"),

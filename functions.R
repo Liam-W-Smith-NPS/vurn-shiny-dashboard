@@ -4,7 +4,11 @@ load_data <- function() {
   data <- list()
   
   # Load geometry data
-  data$vua_geom <- st_read(dsn = here("data/AKR_CUA_Location_Polygons_20260414.gdb"), # load data
+  tmp_zip_cua <- tempfile(fileext = ".zip")
+  download.file("https://irma.nps.gov/DataStore/DownloadFile/757359", tmp_zip_cua, mode = "wb")
+  tmp_dir_cua <- tempfile()
+  unzip(tmp_zip_cua, exdir = tmp_dir_cua)
+  data$vua_geom <- st_read(dsn = file.path(tmp_dir_cua, list.files(tmp_dir_cua)), # load data
                            quiet = TRUE) |>
     st_cast("MULTIPOLYGON") |> # convert curved geometries to multipolygon to prevent issues with sf and tmap
     st_transform(6393) |> # convert to Alaska specific CRS
@@ -14,7 +18,7 @@ load_data <- function() {
   data$daily_visitor_use <- read_csv(here("data/daily_visitor_use.csv"))
   
   # Wrangle tabular data to match export from IRMA website 
-  # (adjusted so trips splitting multiple months fall into each month proportinoally)
+  # (adjusted so trips splitting multiple months fall into each month proportionally)
   data$visitor_use_export <- data$daily_visitor_use |>
     filter(AccountYear < 2026) |>
     group_by(UnitCode, AccountYear, Location, Park, Preserve, BC, FC, Wilderness, 
@@ -24,7 +28,11 @@ load_data <- function() {
     filter(UserDays != 0) # NOTE: if we ever make visualizations about NumberTrips, make a copy of this without removing rows were UserDays is 0
   
   # Read fire data
-  data$fire_polygons <- st_read(dsn = here("data/AlaskaFireHistory_Polygons.gdb"),
+  tmp_zip_fire <- tempfile(fileext = ".zip")
+  download.file("https://fire.ak.blm.gov/content/maps/aicc/Data/Data%20(zipped%20filegeodatabases)/AlaskaFireHistory_PerimeterPolygons_gdb.zip", tmp_zip_fire, mode = "wb")
+  tmp_dir_fire <- tempfile()
+  unzip(tmp_zip_fire, exdir = tmp_dir_fire)
+  data$fire_polygons <- st_read(dsn = file.path(tmp_dir_fire, "AlaskaFireHistory_Polygons.gdb"),
                                 layer = "AK_fire_location_polygons_AKAlbersNAD83",
                                 quiet = TRUE) |>
     filter(FIREYEAR %in% 1994:2025) |> # filter for polygons from last 30 years
@@ -118,8 +126,8 @@ load_data <- function() {
 
 # Set urls for basemaps
 basemaps <- list()
-basemaps$park_tiles_standard <- "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck58pyquo009v01p99xebegr9/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
-basemaps$park_tiles_slate <- "https://atlas-stg.geoplatform.gov/styles/v1/atlas-user/ck5cpvc2e0avf01p9zaw4co8o/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoiYXRsYXMtdXNlciIsImEiOiJjazFmdGx2bjQwMDAwMG5wZmYwbmJwbmE2In0.lWXK2UexpXuyVitesLdwUg"
+basemaps$park_tiles_standard <- Sys.getenv("park_tiles_standard")
+basemaps$park_tiles_slate <- Sys.getenv("park_tiles_slate")
 
 # Function to generate interactive choropleth
 create_interactive_choropleth <- function(vua_map_data, basemap, park) {
