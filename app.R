@@ -41,9 +41,17 @@ ui <- page_navbar(
     tags$div(
       tags$p("Data Sources", style = "margin: 0; font-weight: bold;"),
       tags$ul(
+        style = "margin-bottom: 0;",
         tags$li(tags$a("Visitor use areas", href = "https://irma.nps.gov/DataStore/Reference/Profile/2303057", target = "_blank")),
         tags$li(tags$a("Visitor use data", href = "https://github.com/Liam-W-Smith-NPS/vurn-shiny-dashboard-dev/blob/main/data/daily_visitor_use.csv", target = "_blank")),
         tags$li(tags$a("Fire history data", href = "https://fire.ak.blm.gov/predsvcs/maps.php", target = "_blank"))
+      )
+    ),
+    tags$div(
+      tags$p("Other Applications", style = "margin: 0; font-weight: bold;"),
+      tags$ul(
+        tags$li(tags$a("Visitor Use Reporting (VURn) system", href = "https://irma.nps.gov/VURn/Report", target = "_blank")),
+        tags$li(tags$a("ESRI-based VURn dashboard", href = "https://experience.arcgis.com/experience/b95804c098664dd4a248a2b902739b65/page/Home?views=View-%28Location-List%29%2CView-20%2CView-30%2CView-9#data_s=id%3AdataSource_10-19cad50279a-layer-1-19cad503088-layer-8%3A12%2Cid%3AdataSource_10-19cad50279a-layer-1-19cad50308b-layer-11%3A168", target = "_blank")),
       )
     )
   ),
