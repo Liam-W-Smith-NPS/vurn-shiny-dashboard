@@ -34,8 +34,8 @@ ui <- page_navbar(
       "year",
       label = tags$b("Year Range"),
       min = 2007,
-      max = 2025,
-      value = c(2007, 2025),
+      max = data$most_recent_year,
+      value = c(2007, data$most_recent_year),
       sep = "" # this removes the comma in the year
     ),
     tags$div(
@@ -936,7 +936,8 @@ server <- function(input, output, session) {
                                                data$ocean_polygon, 
                                                data$vua_animation_data_bubble |>
                                                  filter(UNITCODE == input$park), # selects just min_year:max_year based on visitor_use_export within function
-                                               input$park)
+                                               input$park,
+                                               data$most_recent_year)
       
       # Write animation to file
       tmap_animation(animation,
