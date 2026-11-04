@@ -15,14 +15,13 @@ load_data <- function() {
     select(UNITCODE, UNITNAME, Name, GROUPCODE, GROUPNAME) # select just the columns we need
   
   # Read in tabular data
-  data$daily_visitor_use <- read_csv(here("data/daily_visitor_use.csv"))
+  data$daily_visitor_use <- read_csv(here("data/CUA_VisitorUse_Daily_2025.csv"))
   
   # Wrangle tabular data to match export from IRMA website 
   # (adjusted so trips splitting multiple months fall into each month proportionally)
   data$visitor_use_export <- data$daily_visitor_use |>
     filter(AccountYear < 2026) |>
-    group_by(UnitCode, AccountYear, Location, Park, Preserve, BC, FC, Wilderness, 
-             Coast, CommercialActivity, MonthName, MonthNum) |>
+    group_by(UnitCode, AccountYear, Location, CommercialActivity, MonthName, MonthNum) |>
     summarise(UserDays = sum(UserDays),
               .groups = "drop") |>
     filter(UserDays != 0) # NOTE: if we ever make visualizations about NumberTrips, make a copy of this without removing rows were UserDays is 0
